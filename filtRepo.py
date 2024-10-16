@@ -2,7 +2,7 @@ import requests
 import sys
 import time
 from urllib.parse import urlparse
-
+import re
 # 替换为你的GitHub个人访问令牌
 GITHUB_TOKEN = ''
 
@@ -146,5 +146,37 @@ def main():
 
     print(f"过滤完成，共找到 {len(qualified_repos)} 个符合条件的仓库。结果已保存到 {OUTPUT_FILE}。")
 
+    deduplicate_github_urls(OUTPUT_FILE, OUTPUT_FILE)
+
+
+def extract_repo_name(url):
+    """
+    从GitHub仓库URL中提取仓库名称。
+    例如:
+    输入: https://github.com/username/repo-name
+    输出: repo-name
+    """
+    pattern = r'^https?://github\.com/[^/]+/([^/]+)(?:\.git)?/?$'
+    match = re.match(pattern, url.strip())
+    if match:
+        return match.group(1)
+    else:
+        return None
+
+def deduplicate_github_urls(input_file, output_file):
+    seen_repos = set()
+    with open(input_file, 'r', encoding='utf-8') as infile, \
+         open(output_file, 'w', encoding='utf-8') as outfile:
+        for line in infile:
+            repo_url = line.strip()
+            if not repo_url:
+                continue  # 跳过空行
+            repo_name = extract_repo_name(repo_url)
+            if repo_name is None:
+                print(f"警告: 无法解析URL: {repo_url}", file=sys.stderr)
+                continue
+            if repo_name not in seen_repos:
+                seen_repos.add(repo_name)
+                outfile.write(repo_url + '\n')
 if __name__ == '__main__':
     main()
