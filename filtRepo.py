@@ -146,7 +146,7 @@ def main():
 
     print(f"过滤完成，共找到 {len(qualified_repos)} 个符合条件的仓库。结果已保存到 {OUTPUT_FILE}。")
 
-    deduplicate_github_urls(OUTPUT_FILE, OUTPUT_FILE)
+    #deduplicate_github_urls(OUTPUT_FILE, OUTPUT_FILE)
 
 
 def extract_repo_name(url):
